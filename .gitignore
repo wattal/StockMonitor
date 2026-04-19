@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pkl
+*.json
+backups/
+.streamlit/
+*.log
+.DS_Store
