@@ -193,6 +193,15 @@ with st.sidebar:
     if rsi_col3.button("Clear", use_container_width=True):
         st.session_state.persist_rsi = "All"
         st.rerun()
+    
+    st.write("**Market Cap:**")
+    if "persist_mcap" not in st.session_state: st.session_state.persist_mcap = "All"
+    mcap_options = ["All", "Large Cap", "Mid Cap", "Small Cap", "Micro Cap"]
+    mcap_idx = mcap_options.index(st.session_state.persist_mcap) if st.session_state.persist_mcap in mcap_options else 0
+    mcap_sel = st.selectbox("MCap", options=mcap_options, index=mcap_idx, key="persist_mcap_select", label_visibility="collapsed")
+    if mcap_sel != st.session_state.persist_mcap:
+        st.session_state.persist_mcap = mcap_sel
+        st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
 
     # --- WATCHLIST ---
@@ -275,6 +284,18 @@ if not st.session_state.market_df.empty:
     
     if st.session_state.persist_rsi == "Overbought": active = active[active["RSI(14)"] >= 70]
     elif st.session_state.persist_rsi == "Oversold": active = active[active["RSI(14)"] <= 30]
+    
+    # Market Cap filter (MCap ($) is in Million USD)
+    if st.session_state.get("persist_mcap") and st.session_state.persist_mcap != "All":
+        mcap_m = active["MCap ($)"]  # Already in Million $
+        if st.session_state.persist_mcap == "Large Cap":
+            active = active[mcap_m > 240]  # > $240M (>₹20,000Cr)
+        elif st.session_state.persist_mcap == "Mid Cap":
+            active = active[(mcap_m >= 60) & (mcap_m <= 240)]  # $60-240M
+        elif st.session_state.persist_mcap == "Small Cap":
+            active = active[(mcap_m >= 6) & (mcap_m < 60)]  # $6-60M
+        elif st.session_state.persist_mcap == "Micro Cap":
+            active = active[mcap_m < 6]  # < $6M
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
@@ -395,6 +416,7 @@ if not st.session_state.market_df.empty:
     elif st.session_state.get("persist_rsi") == "Oversold": filter_active = "RSI <30"
     elif st.session_state.get("persist_favs"): filter_active = "Favorites"
     elif st.session_state.get("persist_trend") != "All": filter_active = st.session_state.get("persist_trend")
+    elif st.session_state.get("persist_mcap") != "All": filter_active = st.session_state.get("persist_mcap")
     
     st.markdown(f"**{shown}** of **{total}** stocks" + (f" · {filter_active}" if filter_active else ""))
     
