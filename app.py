@@ -288,14 +288,15 @@ if not st.session_state.market_df.empty:
     # Market Cap filter (MCap ($) is in Million USD)
     if st.session_state.get("persist_mcap") and st.session_state.persist_mcap != "All":
         mcap_m = active["MCap ($)"]  # Already in Million $
+        # Keep stocks with NaN MCap when filter is applied
         if st.session_state.persist_mcap == "Large Cap":
-            active = active[mcap_m > 1000]  # > $1B
+            active = active[(mcap_m > 1000) | mcap_m.isna()]
         elif st.session_state.persist_mcap == "Mid Cap":
-            active = active[(mcap_m >= 100) & (mcap_m <= 1000)]  # $100M-1B
+            active = active[((mcap_m >= 100) & (mcap_m <= 1000)) | mcap_m.isna()]
         elif st.session_state.persist_mcap == "Small Cap":
-            active = active[(mcap_m >= 10) & (mcap_m < 100)]  # $10M-100M
+            active = active[((mcap_m >= 10) & (mcap_m < 100)) | mcap_m.isna()]
         elif st.session_state.persist_mcap == "Micro Cap":
-            active = active[(mcap_m > 0) & (mcap_m < 10)]  # $0-10M
+            active = active[((mcap_m > 0) & (mcap_m < 10)) | mcap_m.isna()]
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
