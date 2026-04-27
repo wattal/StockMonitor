@@ -289,13 +289,13 @@ if not st.session_state.market_df.empty:
     if st.session_state.get("persist_mcap") and st.session_state.persist_mcap != "All":
         mcap_m = active["MCap ($)"]  # Already in Million $
         if st.session_state.persist_mcap == "Large Cap":
-            active = active[mcap_m > 240]  # > $240M (>₹20,000Cr)
+            active = active[mcap_m > 1000]  # > $1B
         elif st.session_state.persist_mcap == "Mid Cap":
-            active = active[(mcap_m >= 60) & (mcap_m <= 240)]  # $60-240M
+            active = active[(mcap_m >= 100) & (mcap_m <= 1000)]  # $100M-1B
         elif st.session_state.persist_mcap == "Small Cap":
-            active = active[(mcap_m >= 6) & (mcap_m < 60)]  # $6-60M
+            active = active[(mcap_m >= 10) & (mcap_m < 100)]  # $10M-100M
         elif st.session_state.persist_mcap == "Micro Cap":
-            active = active[mcap_m < 6]  # < $6M
+            active = active[(mcap_m > 0) & (mcap_m < 10)]  # $0-10M
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
