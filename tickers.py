@@ -406,4 +406,11 @@ MASTER_MAP = {
     "VIKASLIFE.BO": {"Name": "Vikas Lifecare", "Sector": "Chemicals"},
     "SCANPGEOM.BO": {"Name": "Scanpoint Geomatics", "Sector": "IT Services"},
     "RTNPOWER.NS": {"Name": "RattanIndia Power", "Sector": "Power Generation"},
+    "INA.BO": {"Name": "Insolation Energy", "Sector": "Solar Energy", "AddedDate": "2025-04-27"},
+    "GKENERGY.NS": {"Name": "GK Energy", "Sector": "Solar Energy", "AddedDate": "2025-04-27"},
+    "TUNWALSM.NS": {"Name": "Tunwal E-Motors", "Sector": "Electric Vehicles", "AddedDate": "2025-04-27"},
+    "DCGSM.BO": {"Name": "DCG Cables & Wires", "Sector": "Cables & Wires", "AddedDate": "2025-04-27"},
+    "PARMESHWAR.BO": {"Name": "Parmeshwar Metal", "Sector": "Metals - Copper", "AddedDate": "2025-04-27"},
+    "SHRITECH-SM.NS": {"Name": "Shri Techtex", "Sector": "Textiles - Technical", "AddedDate": "2025-04-27"},
+    "PARDRGS.NS": {"Name": "Par Drugs & Chem", "Sector": "Pharmaceuticals", "AddedDate": "2025-04-27"},
 }

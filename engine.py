@@ -154,7 +154,7 @@ def get_live_data(tickers, baselines, dormant_set, mode="desktop"):
             pct = lambda val, base: (((val - base) / base) * 100 if base and not pd.isna(base) else np.nan)
             
             rows.append({
-                "Name": MASTER_MAP[t]["Name"], "Sector": MASTER_MAP[t]["Sector"], "LTP": p,
+                "Name": MASTER_MAP[t]["Name"], "Sector": MASTER_MAP[t]["Sector"], "AddedDate": MASTER_MAP[t].get("AddedDate", ""), "LTP": p,
                 "Change%": ((p - prev) / prev) * 100,
                 "vs 15D H %": pct(p, b.get("15DH")), "vs 30D H %": pct(p, b.get("30DH")), 
                 "vs 3M H %": pct(p, b.get("3MH")), "vs 6M H %": pct(p, b.get("6MH")),
@@ -206,7 +206,7 @@ def quick_refresh_prices(tickers, baselines):
             pct = lambda val, base: (((val - base) / base) * 100 if base and not pd.isna(base) else np.nan)
             
             rows.append({
-                "Name": MASTER_MAP[t]["Name"], "Sector": MASTER_MAP[t]["Sector"], "LTP": p,
+                "Name": MASTER_MAP[t]["Name"], "Sector": MASTER_MAP[t]["Sector"], "AddedDate": MASTER_MAP[t].get("AddedDate", ""), "LTP": p,
                 "Change%": ((p - prev) / prev) * 100,
                 "vs 15D H %": pct(p, b.get("15DH")), "vs 30D H %": pct(p, b.get("30DH")), 
                 "vs 3M H %": pct(p, b.get("3MH")), "vs 6M H %": pct(p, b.get("6MH")),

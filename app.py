@@ -364,7 +364,7 @@ if not st.session_state.market_df.empty:
         ]
     else:
         order = [
-            "Star", "#", "1Y", "Link", "Name", "Sector", "LTP", "Change%", "Port Count", "Port Total",
+            "Star", "#", "1Y", "Link", "Name", "Sector", "AddedDate", "LTP", "Change%", "Port Count", "Port Total",
             "vs 7D H %", "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 1Y H %", "vs 1Y L %",
             "vs 100DMA %", "RSI(14)", "Vol Breakout", "MCap ($)", "PE", "EPS"
         ]
@@ -429,6 +429,7 @@ if not st.session_state.market_df.empty:
             "Link": st.column_config.LinkColumn("🔗", width=40, display_text="🔗"),
             "Name": st.column_config.TextColumn("Name", width=130),
             "Sector": st.column_config.TextColumn("Sector", width=70),
+            "AddedDate": st.column_config.TextColumn("Added", width=70),
             "LTP": st.column_config.NumberColumn("LTP", format="₹%.0f", width=65),
             "Change%": st.column_config.NumberColumn("Chg%", format="%.1f%%", width=55),
             "Port Count": st.column_config.NumberColumn("Count", format="%d", width=50),
