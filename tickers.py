@@ -413,4 +413,6 @@ MASTER_MAP = {
     "PARMESHWAR.BO": {"Name": "Parmeshwar Metal", "Sector": "Metals - Copper", "AddedDate": "2025-04-27"},
     "SHRITECH-SM.NS": {"Name": "Shri Techtex", "Sector": "Textiles - Technical", "AddedDate": "2025-04-27"},
     "PARDRGS.NS": {"Name": "Par Drugs & Chem", "Sector": "Pharmaceuticals", "AddedDate": "2025-04-27"},
+    "ACUTAAS.NS": {"Name": "Acutaas Chemicals", "Sector": "Specialty Chemicals", "AddedDate": "2025-05-11"},
+    "STLTECH.NS": {"Name": "STL Tech (Sterlite)", "Sector": "Communication Equipment - Optical Fibre", "AddedDate": "2025-05-11"},
 }
