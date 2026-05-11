@@ -163,14 +163,14 @@ def get_live_data(tickers, baselines, dormant_set, mode="desktop"):
                 "RSI(14)": b.get("RSI", 50),
                 "Vol Breakout": float(v["Volume"].iloc[-1]) / b.get("AvgVol", 1) if b.get("AvgVol", 1) > 0 else 1.0,
                 "vs 100DMA %": pct(p, b.get("MA100")),
-                "TickerID": t, "MCap ($)": np.nan, "PE": np.nan, "PB": np.nan, "EPS": np.nan
+                "TickerID": t, "MCap ($)": np.nan, "PE": np.nan, "PB": np.nan, "EPS": np.nan, "Promoter Activity": ""
             })
         except: continue
     return pd.DataFrame(rows), 0, []
 
 @st.cache_data(ttl=86400)
 def fetch_fundamentals_map(tickers, usd_rate):
-    """Retained: Fetches MCAP, PE, PB, and EPS."""
+    """Fetches MCAP, PE, PB, EPS, and Promoter Holding %."""
     results = {}
     for t in tickers:
         try:
@@ -179,13 +179,41 @@ def fetch_fundamentals_map(tickers, usd_rate):
             curr = info.get("currency", "INR")
             if not pd.isna(mcap):
                 mcap = (mcap / usd_rate / 1_000_000) if curr == "INR" else (mcap / 1_000_000)
+            hpi = info.get("heldPercentInsiders", np.nan)
             results[t] = {
                 "MCap ($)": round(mcap, 2),
                 "PE": info.get("trailingPE", np.nan),
                 "PB": info.get("priceToBook", np.nan),
-                "EPS": info.get("trailingEps", np.nan)
+                "EPS": info.get("trailingEps", np.nan),
+                "Promoter Holding %": round(hpi * 100, 2) if not pd.isna(hpi) else np.nan
             }
         except: continue
+    return results
+
+@st.cache_data(ttl=86400)
+def fetch_promoter_activity_map(tickers):
+    """Fetches recent promoter transactions for all tickers (cached 24h)."""
+    results = {}
+    for t in tickers:
+        try:
+            tkr = yf.Ticker(t)
+            trans = tkr.insider_transactions
+            if trans is not None and not trans.empty:
+                promos = trans[trans["Position"] == "Promoter"].copy()
+                if not promos.empty:
+                    summary_parts = []
+                    for _, row in promos.head(3).iterrows():
+                        action = "B" if "Acquisition" in str(row.get("Transaction", "")) or "Purchase" in str(row.get("Transaction", "")) else "S"
+                        shares = int(row["Shares"]) if not pd.isna(row["Shares"]) else 0
+                        dt = str(row["Start Date"])[:10] if pd.notna(row.get("Start Date")) else ""
+                        summary_parts.append(f"{action}{shares//1000}k@{dt}")
+                    results[t] = ", ".join(summary_parts) if summary_parts else ""
+                else:
+                    results[t] = ""
+            else:
+                results[t] = ""
+        except Exception:
+            results[t] = ""
     return results
 
 def quick_refresh_prices(tickers, baselines):
@@ -215,7 +243,7 @@ def quick_refresh_prices(tickers, baselines):
                 "RSI(14)": b.get("RSI", 50),
                 "Vol Breakout": float(v["Volume"].iloc[-1]) / b.get("AvgVol", 1) if b.get("AvgVol", 1) > 0 else 1.0,
                 "vs 100DMA %": pct(p, b.get("MA100")),
-                "TickerID": t, "MCap ($)": np.nan, "PE": np.nan, "PB": np.nan, "EPS": np.nan
+                "TickerID": t, "MCap ($)": np.nan, "PE": np.nan, "PB": np.nan, "EPS": np.nan, "Promoter Activity": ""
             })
         except: continue
     return pd.DataFrame(rows)

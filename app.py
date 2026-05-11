@@ -366,7 +366,8 @@ if not st.session_state.market_df.empty:
         order = [
             "Star", "#", "1Y", "Link", "Name", "Sector", "AddedDate", "LTP", "Change%", "Port Count", "Port Total",
             "vs 7D H %", "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 1Y H %", "vs 1Y L %",
-            "vs 100DMA %", "RSI(14)", "Vol Breakout", "MCap ($)", "PE", "EPS"
+            "vs 100DMA %", "RSI(14)", "Vol Breakout", "MCap ($)", "PE", "EPS",
+            "Promoter Holding %", "Promoter Activity"
         ]
     
     final_cols = [c for c in order if c in active.columns]
@@ -439,6 +440,8 @@ if not st.session_state.market_df.empty:
             "MCap ($)": st.column_config.NumberColumn("MCap", format="%.0f", width=70),
             "PE": st.column_config.NumberColumn("PE", format="%.1f", width=50),
             "EPS": st.column_config.NumberColumn("EPS", format="%.1f", width=50),
+            "Promoter Holding %": st.column_config.NumberColumn("Prom %", format="%.1f", width=60),
+            "Promoter Activity": st.column_config.TextColumn("Prom Act", width=120),
             **{c: st.column_config.NumberColumn(c.replace("vs ", "").replace(" %", ""), format="%.1f%%", width=50) for c in pct_cols if c not in ["Change%", "RSI(14)", "Vol Breakout"]}
         })
 
@@ -451,4 +454,8 @@ if not st.session_state.market_df.empty:
             for t, v in f_map.items():
                 for col, val in v.items(): 
                     st.session_state.market_df.loc[st.session_state.market_df['TickerID'] == t, col] = val
+            p_map = eng.fetch_promoter_activity_map(MASTER_TICKERS)
+            st.session_state.promoter_activity = p_map
+            for t, val in p_map.items():
+                st.session_state.market_df.loc[st.session_state.market_df['TickerID'] == t, "Promoter Activity"] = val
             st.rerun()
