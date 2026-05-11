@@ -203,10 +203,14 @@ def fetch_promoter_activity_map(tickers):
                 if not promos.empty:
                     summary_parts = []
                     for _, row in promos.head(3).iterrows():
-                        action = "B" if "Acquisition" in str(row.get("Transaction", "")) or "Purchase" in str(row.get("Transaction", "")) else "S"
+                        is_buy = "Acquisition" in str(row.get("Transaction", "")) or "Purchase" in str(row.get("Transaction", ""))
+                        action = "Bought" if is_buy else "Sold"
                         shares = int(row["Shares"]) if not pd.isna(row["Shares"]) else 0
                         dt = str(row["Start Date"])[:10] if pd.notna(row.get("Start Date")) else ""
-                        summary_parts.append(f"{action}{shares//1000}k@{dt}")
+                        if shares >= 1000:
+                            summary_parts.append(f"{action} {shares//1000}K ({dt[-5:]})")
+                        else:
+                            summary_parts.append(f"{action} {shares} ({dt[-5:]})")
                     results[t] = ", ".join(summary_parts) if summary_parts else ""
                 else:
                     results[t] = ""

@@ -440,8 +440,8 @@ if not st.session_state.market_df.empty:
             "MCap ($)": st.column_config.NumberColumn("MCap", format="%.0f", width=70),
             "PE": st.column_config.NumberColumn("PE", format="%.1f", width=50),
             "EPS": st.column_config.NumberColumn("EPS", format="%.1f", width=50),
-            "Promoter Holding %": st.column_config.NumberColumn("Prom %", format="%.1f", width=60),
-            "Promoter Activity": st.column_config.TextColumn("Prom Act", width=120),
+            "Promoter Holding %": st.column_config.NumberColumn("Prom%", format="%.1f", width=55),
+            "Promoter Activity": st.column_config.TextColumn("Promoter Activity (Recent)", width=160),
             **{c: st.column_config.NumberColumn(c.replace("vs ", "").replace(" %", ""), format="%.1f%%", width=50) for c in pct_cols if c not in ["Change%", "RSI(14)", "Vol Breakout"]}
         })
 
