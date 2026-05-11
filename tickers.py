@@ -415,4 +415,6 @@ MASTER_MAP = {
     "PARDRGS.NS": {"Name": "Par Drugs & Chem", "Sector": "Pharmaceuticals", "AddedDate": "2025-04-27"},
     "ACUTAAS.NS": {"Name": "Acutaas Chemicals", "Sector": "Specialty Chemicals", "AddedDate": "2025-05-11"},
     "STLTECH.NS": {"Name": "STL Tech (Sterlite)", "Sector": "Communication Equipment - Optical Fibre", "AddedDate": "2025-05-11"},
+    "SRF.NS": {"Name": "SRF Ltd", "Sector": "Chemicals - Specialty", "AddedDate": "2025-05-11"},
+    "CLEAN.NS": {"Name": "Clean Science & Technology", "Sector": "Chemicals - Specialty", "AddedDate": "2025-05-11"},
 }
