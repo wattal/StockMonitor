@@ -2,6 +2,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import time
+import datetime
 import streamlit as st
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -192,7 +193,8 @@ def fetch_fundamentals_map(tickers, usd_rate):
 
 @st.cache_data(ttl=86400)
 def fetch_promoter_activity_map(tickers):
-    """Fetches recent promoter transactions for all tickers (cached 24h)."""
+    """Fetches promoter transactions within last 30 days for all tickers (cached 24h)."""
+    cutoff = datetime.datetime.now() - datetime.timedelta(days=30)
     results = {}
     for t in tickers:
         try:
@@ -200,18 +202,23 @@ def fetch_promoter_activity_map(tickers):
             trans = tkr.insider_transactions
             if trans is not None and not trans.empty:
                 promos = trans[trans["Position"] == "Promoter"].copy()
-                if not promos.empty:
-                    summary_parts = []
-                    for _, row in promos.head(3).iterrows():
-                        is_buy = "Acquisition" in str(row.get("Transaction", "")) or "Purchase" in str(row.get("Transaction", ""))
-                        action = "Bought" if is_buy else "Sold"
-                        shares = int(row["Shares"]) if not pd.isna(row["Shares"]) else 0
-                        dt = str(row["Start Date"])[:10] if pd.notna(row.get("Start Date")) else ""
-                        if shares >= 1000:
-                            summary_parts.append(f"{action} {shares//1000}K ({dt[-5:]})")
-                        else:
-                            summary_parts.append(f"{action} {shares} ({dt[-5:]})")
-                    results[t] = ", ".join(summary_parts) if summary_parts else ""
+                if not promos.empty and "Start Date" in promos.columns:
+                    promos["Start Date"] = pd.to_datetime(promos["Start Date"], errors="coerce")
+                    recent = promos[promos["Start Date"] >= cutoff]
+                    if not recent.empty:
+                        summary_parts = []
+                        for _, row in recent.head(3).iterrows():
+                            is_buy = "Acquisition" in str(row.get("Transaction", "")) or "Purchase" in str(row.get("Transaction", ""))
+                            action = "Bought" if is_buy else "Sold"
+                            shares = int(row["Shares"]) if not pd.isna(row["Shares"]) else 0
+                            dt = str(row["Start Date"])[:10] if pd.notna(row.get("Start Date")) else ""
+                            if shares >= 1000:
+                                summary_parts.append(f"{action} {shares//1000}K ({dt[-5:]})")
+                            else:
+                                summary_parts.append(f"{action} {shares} ({dt[-5:]})")
+                        results[t] = ", ".join(summary_parts) if summary_parts else ""
+                    else:
+                        results[t] = ""
                 else:
                     results[t] = ""
             else:
