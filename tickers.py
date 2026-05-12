@@ -417,4 +417,9 @@ MASTER_MAP = {
     "STLTECH.NS": {"Name": "STL Tech (Sterlite)", "Sector": "Communication Equipment - Optical Fibre", "AddedDate": "2025-05-11"},
     "SRF.NS": {"Name": "SRF Ltd", "Sector": "Chemicals - Specialty", "AddedDate": "2025-05-11"},
     "CLEAN.NS": {"Name": "Clean Science & Technology", "Sector": "Chemicals - Specialty", "AddedDate": "2025-05-11"},
+    "WEBELSOLAR.NS": {"Name": "Websol Energy System", "Sector": "Solar Energy", "AddedDate": "2025-05-12"},
+    "YUKEN.NS": {"Name": "Yuken India", "Sector": "Engineering - Hydraulics", "AddedDate": "2025-05-12"},
+    "WAA.BO": {"Name": "Waa Solar", "Sector": "Solar Power", "AddedDate": "2025-05-12"},
+    "WINSOL-SM.NS": {"Name": "Winsol Engineers", "Sector": "Engineering - Construction", "AddedDate": "2025-05-12"},
+    "WAAREEENER.NS": {"Name": "Waaree Energy", "Sector": "Solar Energy - Equipment", "AddedDate": "2025-05-12"},
 }
