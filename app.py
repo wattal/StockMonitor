@@ -300,12 +300,12 @@ if not st.session_state.market_df.empty:
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
-        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=15)
+        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=20)
         for i, row in active.iterrows():
             ticker = row["TickerID"]
             closes = daily_prices.get(ticker, [])
-            if len(closes) >= 11:
-                for days_ago in range(2, 11):
+            if len(closes) >= 16:
+                for days_ago in range(2, 16):
                     curr_idx = -days_ago
                     prev_idx = -(days_ago + 1)
                     curr_c = closes[curr_idx]
@@ -359,7 +359,7 @@ if not st.session_state.market_df.empty:
         order = [
             "Star", "#", "1Y", "Link", "Name", "Sector", "LTP", "Change%",
             "2D Chg", "3D Chg", "4D Chg", "5D Chg", "6D Chg",
-            "7D Chg", "8D Chg", "9D Chg", "10D Chg",
+            "7D Chg", "8D Chg", "9D Chg", "10D Chg", "11D Chg", "12D Chg", "13D Chg", "14D Chg", "15D Chg",
             "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 6M H %", "vs 1Y H %"
         ]
     else:
