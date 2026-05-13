@@ -33,7 +33,7 @@ def calculate_rsi(series, period=14):
 def get_usd_rate():
     """Retained: Fetches live USD to INR exchange rate."""
     try:
-        df = yf.download("USDINR=X", period="5d", progress=False)
+        df = yf.download("USDINR=X", period="5d", progress=False, auto_adjust=False)
         return float(df["Close"].iloc[-1])
     except:
         return 84.5
@@ -49,7 +49,7 @@ def get_daily_prices(tickers, days=15):
                 return json.load(f)
         except: pass
     
-    data = yf.download(tickers, period=f"{days}d", group_by="ticker", progress=False, threads=True)
+    data = yf.download(tickers, period=f"{days}d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     prices = {}
     for t in tickers:
         try:
@@ -76,7 +76,7 @@ def download_bulk_history(tickers):
         except: pass
     
     cleaned = [t.upper().strip() + (".NS" if not (t.endswith(".NS") or t.endswith(".BO")) else "") for t in tickers]
-    data = yf.download(list(set(cleaned)), period="2y", group_by="ticker", progress=False, threads=True)
+    data = yf.download(list(set(cleaned)), period="2y", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     
     try:
         import pickle
@@ -142,7 +142,7 @@ def get_live_data(tickers, baselines, dormant_set, mode="desktop"):
     rows = []
     
     # Get live prices
-    data = yf.download(active, period="5d", group_by="ticker", progress=False, threads=True)
+    data = yf.download(active, period="5d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     
     for t in active:
         try:
@@ -232,7 +232,7 @@ def quick_refresh_prices(tickers, baselines):
     from tickers import MASTER_MAP
     rows = []
     
-    data = yf.download(tickers, period="2d", group_by="ticker", progress=False, threads=True)
+    data = yf.download(tickers, period="2d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     
     for t in tickers:
         try:
