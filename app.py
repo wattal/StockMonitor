@@ -7,6 +7,7 @@ import time
 import json
 import os
 import engine as eng
+import zerodha as zd
 from tickers import MASTER_MAP
 
 # 1. PAGE CONFIG
@@ -223,6 +224,47 @@ with st.sidebar:
     if st.button("Add to Portfolio", use_container_width=True):
         handle_portfolio_add()
         st.rerun()
+    st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
+    
+    # --- ZERODHA CONNECT ---
+    section_header("Zerodha")
+    z_api_key = st.text_input("API Key", value=st.session_state.get("zd_api_key", ""), key="zd_api_key_input", label_visibility="collapsed", placeholder="API Key")
+    z_api_secret = st.text_input("Secret", type="password", value=st.session_state.get("zd_api_secret", ""), key="zd_api_secret_input", label_visibility="collapsed", placeholder="API Secret")
+    if st.button("Connect", use_container_width=True):
+        if z_api_key and z_api_secret:
+            st.session_state.zd_api_key = z_api_key
+            st.session_state.zd_api_secret = z_api_secret
+            login_url = zd.generate_login_url(z_api_key)
+            st.session_state.zd_login_url = login_url
+            st.rerun()
+    if st.session_state.get("zd_login_url"):
+        st.markdown(f"[🔗 Login with Zerodha]({st.session_state.zd_login_url})")
+    z_request_token = st.text_input("Request Token", value=st.session_state.get("zd_request_token", ""), key="zd_request_token_input", label_visibility="collapsed", placeholder="Paste request_token from redirect URL")
+    if st.button("Exchange Token", use_container_width=True):
+        if z_request_token:
+            access_token = zd.get_session(st.session_state.zd_api_key, st.session_state.zd_api_secret, z_request_token)
+            if access_token:
+                st.session_state.zd_access_token = access_token
+                st.success("Connected to Zerodha!")
+                st.rerun()
+    if st.session_state.get("zd_access_token"):
+        st.caption("✅ Connected to Zerodha")
+        if st.button("Sync Portfolio", use_container_width=True):
+            holdings = zd.fetch_holdings(st.session_state.zd_api_key, st.session_state.zd_access_token)
+            if holdings:
+                mapped = zd.map_holding_to_ticker(holdings)
+                for ticker, qty, avg_cost in mapped:
+                    st.session_state.portfolio[ticker] = {"count": qty, "avg_cost": avg_cost}
+                save_portfolio()
+                st.success(f"Synced {len(mapped)} stocks from Zerodha!")
+                st.rerun()
+    else:
+        # Auto-detect request_token from URL query params
+        qp = st.query_params
+        if "request_token" in qp:
+            rt = qp["request_token"]
+            st.session_state.zd_request_token = rt
+            st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
     
     # --- CONTROLS ---
