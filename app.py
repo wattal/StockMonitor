@@ -141,7 +141,8 @@ def do_quick_refresh():
     except Exception as e: st.error(f"Quick Refresh Error: {e}")
 
 def clear_all_caches():
-    for f in ["history_cache.pkl", "daily_prices_15d.json"]:
+    import glob
+    for f in glob.glob("daily_prices_*.json") + ["history_cache.pkl"]:
         try: os.remove(f)
         except: pass
     st.session_state.market_df = pd.DataFrame()
