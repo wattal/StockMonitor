@@ -258,12 +258,17 @@ with st.sidebar:
                 save_portfolio()
                 st.success(f"Synced {len(mapped)} stocks from Zerodha!")
                 st.rerun()
-    else:
+    if not st.session_state.get("zd_access_token"):
         # Auto-detect request_token from URL query params
         qp = st.query_params
         if "request_token" in qp:
             rt = qp["request_token"]
+            st.query_params.clear()
             st.session_state.zd_request_token = rt
+            if st.session_state.get("zd_api_key") and st.session_state.get("zd_api_secret"):
+                access_token = zd.get_session(st.session_state.zd_api_key, st.session_state.zd_api_secret, rt)
+                if access_token:
+                    st.session_state.zd_access_token = access_token
             st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
     
