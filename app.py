@@ -241,10 +241,13 @@ with st.sidebar:
         st.markdown(f"[🔗 Login with Zerodha]({st.session_state.zd_login_url})")
     z_request_token = st.text_input("Request Token", value=st.session_state.get("zd_request_token", ""), key="zd_request_token_input", label_visibility="collapsed", placeholder="Paste request_token from redirect URL")
     if st.button("Exchange Token", use_container_width=True):
-        if z_request_token:
-            access_token = zd.get_session(st.session_state.zd_api_key, st.session_state.zd_api_secret, z_request_token)
+        if z_request_token and z_api_key and z_api_secret:
+            access_token = zd.get_session(z_api_key, z_api_secret, z_request_token)
             if access_token:
+                st.session_state.zd_api_key = z_api_key
+                st.session_state.zd_api_secret = z_api_secret
                 st.session_state.zd_access_token = access_token
+                st.session_state.zd_login_url = zd.generate_login_url(z_api_key)
                 st.success("Connected to Zerodha!")
                 st.rerun()
     if st.session_state.get("zd_access_token"):
@@ -265,8 +268,10 @@ with st.sidebar:
             rt = qp["request_token"]
             st.query_params.clear()
             st.session_state.zd_request_token = rt
-            if st.session_state.get("zd_api_key") and st.session_state.get("zd_api_secret"):
-                access_token = zd.get_session(st.session_state.zd_api_key, st.session_state.zd_api_secret, rt)
+            if z_api_key and z_api_secret:
+                st.session_state.zd_api_key = z_api_key
+                st.session_state.zd_api_secret = z_api_secret
+                access_token = zd.get_session(z_api_key, z_api_secret, rt)
                 if access_token:
                     st.session_state.zd_access_token = access_token
             st.rerun()
