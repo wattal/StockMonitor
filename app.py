@@ -360,7 +360,7 @@ if not st.session_state.market_df.empty:
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
-        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=20)
+        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=20, force_refresh=True)
         for i, row in active.iterrows():
             ticker = row["TickerID"]
             closes = daily_prices.get(ticker, [])
@@ -504,6 +504,19 @@ if not st.session_state.market_df.empty:
             "Promoter Activity": st.column_config.TextColumn("Promoter Activity (Recent)", width=160),
             **{c: st.column_config.NumberColumn(c.replace("vs ", "").replace(" %", ""), format="%.1f%%", width=50) for c in pct_cols if c not in ["Change%", "RSI(14)", "Vol Breakout"]}
         })
+
+    # --- DEBUG: Raw daily prices ---
+    if st.session_state.get("trend_view", False):
+        with st.expander("Debug: Raw Prices", expanded=False):
+            for ticker in list(active["TickerID"])[:3]:
+                closes = daily_prices.get(ticker, [])
+                name = active[active["TickerID"] == ticker]["Name"].values[0] if len(active) > 0 else ticker
+                st.write(f"**{name}** ({ticker}): {len(closes)} closes")
+                if len(closes) >= 3:
+                    st.write(f"  closes[-3:] = {closes[-3:]}")
+                    chg = active[active["TickerID"] == ticker]["Change%"].values[0] if len(active) > 0 else 0
+                    st.write(f"  Change%={chg:.3f}, 2D Chg=({closes[-2]:.2f}-{closes[-3]:.2f})/{closes[-3]:.2f}*100 = {((closes[-2]-closes[-3])/closes[-3])*100:.3f}")
+                st.write("---")
 
     # 8. BACKGROUND SNAPSHOT SYNC
     if "MCap ($)" in active.columns and active["MCap ($)"].isnull().all():
