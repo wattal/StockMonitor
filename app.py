@@ -241,7 +241,7 @@ with st.sidebar:
             st.session_state.zd_login_url = login_url
             st.rerun()
     if st.session_state.get("zd_login_url"):
-        st.markdown(f"<a href='{st.session_state.zd_login_url}' target='_blank'>🔗 Login with Zerodha (opens new tab)</a>", unsafe_allow_html=True)
+        st.link_button("🔗 Login with Zerodha", st.session_state.zd_login_url, use_container_width=True)
     z_request_token = st.text_input("Request Token", value=st.session_state.get("zd_request_token", ""), key="zd_request_token_input", label_visibility="collapsed", placeholder="Paste request_token from redirect URL")
     if st.button("Exchange Token", use_container_width=True):
         if z_request_token and z_api_key and z_api_secret:
