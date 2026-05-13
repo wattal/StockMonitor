@@ -92,10 +92,11 @@ def is_market_open():
 
 def get_index_data(ticker, name):
     try:
-        df = yf.download(ticker, period="2d", progress=False)
+        df = yf.download(ticker, period="2d", progress=False, auto_adjust=False)
         if df is not None and not df.empty:
-            c = float(df["Close"].iloc[-1])
-            p = float(df["Close"].iloc[-2])
+            close_col = "Close" if "Close" in df.columns else df.columns[df.columns.get_level_values(0).str.contains("Close")][0]
+            c = float(df[close_col].iloc[-1])
+            p = float(df[close_col].iloc[-2])
             chg = ((c-p)/p)*100
             return name, f"{c:,.0f}", f"{chg:+.2f}%"
     except: pass
