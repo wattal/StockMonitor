@@ -213,12 +213,13 @@ with st.sidebar:
         st.session_state.persist_mcap = mcap_sel
         st.rerun()
     
-    # Sector filter
+# Sector filter
     st.write("**Sector:**")
-    all_sectors = sorted(set(MASTER_MAP[t]["Sector"] for t in MASTER_TICKERS))
+    def parent_sector(s): return s.split(" - ")[0] if " - " in s else s
+    all_sectors = sorted(set(parent_sector(MASTER_MAP[t]["Sector"]) for t in MASTER_TICKERS))
     if "persist_sector" not in st.session_state: st.session_state.persist_sector = "All"
-    sector_idx = (all_sectors.index(st.session_state.persist_sector) + 1) if st.session_state.persist_sector in all_sectors else 0
     sector_opts = ["All"] + all_sectors
+    sector_idx = sector_opts.index(st.session_state.persist_sector) if st.session_state.persist_sector in sector_opts else 0
     sector_sel = st.selectbox("Sector", options=sector_opts, index=sector_idx, key="persist_sector_select", label_visibility="collapsed")
     if sector_sel != st.session_state.persist_sector:
         st.session_state.persist_sector = sector_sel
@@ -319,9 +320,9 @@ if not st.session_state.market_df.empty:
         elif st.session_state.persist_mcap == "Micro Cap":
             active = active[((mcap_m > 0) & (mcap_m < 10)) | mcap_m.isna()]
 
-    # Sector filter
+    # Sector filter (match parent category)
     if st.session_state.get("persist_sector") and st.session_state.persist_sector != "All":
-        active = active[active["Sector"] == st.session_state.persist_sector]
+        active = active[active["Sector"].str.split(" - ").str[0] == st.session_state.persist_sector]
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
@@ -379,6 +380,9 @@ if not st.session_state.market_df.empty:
     active.insert(1, "#", range(1, len(active) + 1))
 
     active = active.sort_values(by="Change%", ascending=False, ignore_index=True, na_position="last")
+
+    # Collapse Sector to parent category for display
+    active["Sector"] = active["Sector"].apply(lambda x: x.split(" - ")[0] if " - " in str(x) else x)
 
     # 7. COLUMN DEFINITIONS & STYLING (Compact)
     if st.session_state.get("trend_view", False):
