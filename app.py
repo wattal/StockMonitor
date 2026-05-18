@@ -371,7 +371,7 @@ if not st.session_state.market_df.empty:
     
     active.insert(1, "#", range(1, len(active) + 1))
 
-    active = active.sort_values(by="Name", ignore_index=True)
+    active = active.sort_values(by="Change%", ascending=False, ignore_index=True, na_position="last")
 
     # 7. COLUMN DEFINITIONS & STYLING (Compact)
     if st.session_state.get("trend_view", False):
