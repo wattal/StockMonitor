@@ -38,22 +38,23 @@ def get_usd_rate():
     except:
         return 84.5
 
-def get_daily_prices(tickers, days=15, force_refresh=False):
-    """Get daily closing prices per-ticker (avoids yfinance group_by MultiIndex issues)."""
+def get_daily_prices(tickers, days=15):
+    """Get daily closing prices with caching (refreshes once per day)."""
     import json
     cache_file = f"daily_prices_{days}d.json"
     
-    if not force_refresh and get_file_age_hours(cache_file) < CACHE_HOURS:
+    if get_file_age_hours(cache_file) < CACHE_HOURS:
         try:
             with open(cache_file, 'r') as f:
                 return json.load(f)
         except: pass
     
+    data = yf.download(tickers, period=f"{days}d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     prices = {}
     for t in tickers:
         try:
-            df = yf.download(t, period=f"{days}d", progress=False, auto_adjust=False)
-            closes = df["Close"].dropna().tolist()
+            df_t = data[t] if len(tickers) > 1 else data
+            closes = df_t["Close"].dropna().tolist()
             prices[t] = closes
         except: pass
     
@@ -231,7 +232,7 @@ def quick_refresh_prices(tickers, baselines):
     from tickers import MASTER_MAP
     rows = []
     
-    data = yf.download(tickers, period="5d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
+    data = yf.download(tickers, period="2d", group_by="ticker", progress=False, threads=True, auto_adjust=False)
     
     for t in tickers:
         try:
