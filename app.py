@@ -426,6 +426,24 @@ if not st.session_state.market_df.empty:
     
     st.markdown(f"**{shown}** of **{total}** stocks" + (f" · {filter_active}" if filter_active else ""))
     
+    # Summary stats bar
+    chg_vals = active["Change%"].dropna()
+    green = (chg_vals > 0).sum()
+    red = (chg_vals < 0).sum()
+    flat = (chg_vals == 0).sum()
+    best_idx = chg_vals.idxmax() if not chg_vals.empty else None
+    worst_idx = chg_vals.idxmin() if not chg_vals.empty else None
+    best_name = active.at[best_idx, "Name"] if best_idx is not None else ""
+    worst_name = active.at[worst_idx, "Name"] if worst_idx is not None else ""
+    best_chg = chg_vals.max() if not chg_vals.empty else 0
+    worst_chg = chg_vals.min() if not chg_vals.empty else 0
+    st.markdown(
+        f"🟢 {green}  🔴 {red}  ⚪ {flat}  &nbsp;|&nbsp; "
+        f"▲ {best_name} {best_chg:+.1f}%  &nbsp;|&nbsp; "
+        f"▼ {worst_name} {worst_chg:+.1f}%",
+        unsafe_allow_html=True
+    )
+    
     st.dataframe(styled_df, width='stretch', hide_index=True, height=2000,
         column_config={
             "Star": st.column_config.TextColumn("⭐", width=30),
