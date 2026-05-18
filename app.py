@@ -205,6 +205,17 @@ with st.sidebar:
     if mcap_sel != st.session_state.persist_mcap:
         st.session_state.persist_mcap = mcap_sel
         st.rerun()
+    
+    # Sector filter
+    st.write("**Sector:**")
+    all_sectors = sorted(set(MASTER_MAP[t]["Sector"] for t in MASTER_TICKERS))
+    if "persist_sector" not in st.session_state: st.session_state.persist_sector = "All"
+    sector_idx = (all_sectors.index(st.session_state.persist_sector) + 1) if st.session_state.persist_sector in all_sectors else 0
+    sector_opts = ["All"] + all_sectors
+    sector_sel = st.selectbox("Sector", options=sector_opts, index=sector_idx, key="persist_sector_select", label_visibility="collapsed")
+    if sector_sel != st.session_state.persist_sector:
+        st.session_state.persist_sector = sector_sel
+        st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
 
     # --- WATCHLIST ---
@@ -300,6 +311,10 @@ if not st.session_state.market_df.empty:
             active = active[((mcap_m >= 10) & (mcap_m < 100)) | mcap_m.isna()]
         elif st.session_state.persist_mcap == "Micro Cap":
             active = active[((mcap_m > 0) & (mcap_m < 10)) | mcap_m.isna()]
+
+    # Sector filter
+    if st.session_state.get("persist_sector") and st.session_state.persist_sector != "All":
+        active = active[active["Sector"] == st.session_state.persist_sector]
 
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
@@ -423,6 +438,7 @@ if not st.session_state.market_df.empty:
     elif st.session_state.get("persist_favs"): filter_active = "Favorites"
     elif st.session_state.get("persist_trend") != "All": filter_active = st.session_state.get("persist_trend")
     elif st.session_state.get("persist_mcap") != "All": filter_active = st.session_state.get("persist_mcap")
+    elif st.session_state.get("persist_sector") != "All": filter_active = st.session_state.get("persist_sector")
     
     st.markdown(f"**{shown}** of **{total}** stocks" + (f" · {filter_active}" if filter_active else ""))
     
