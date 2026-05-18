@@ -11,7 +11,7 @@ import engine as eng
 from tickers import MASTER_MAP
 
 # 1. PAGE CONFIG
-st.set_page_config(page_title="Market Monitor v1.1.0", layout="wide")
+st.set_page_config(page_title="Market Monitor v1.2.0", layout="wide")
 
 # 2. UI STYLE
 st.markdown("""
@@ -28,6 +28,13 @@ st.markdown("""
     }
     section[data-testid="stSidebar"] button:hover { 
         background-color: #dbeafe !important;
+    }
+    @media (max-width: 768px) {
+        .stDataFrame { font-size: 0.6rem !important; }
+        .stDataFrame thead th, .stDataFrame tbody td { padding: 1px 3px !important; font-size: 0.55rem !important; }
+        section[data-testid="stSidebar"] button { min-height: 2.5rem !important; font-size: 0.85rem !important; }
+        .st-emotion-cache-1v0mbdj { margin: 0 !important; padding: 0.2rem !important; }
+        button[kind="primary"], button[kind="secondary"] { min-height: 2.5rem !important; }
     }
 </style>
 """, unsafe_allow_html=True)
