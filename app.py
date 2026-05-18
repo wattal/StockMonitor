@@ -431,16 +431,14 @@ if not st.session_state.market_df.empty:
     green = (chg_vals > 0).sum()
     red = (chg_vals < 0).sum()
     flat = (chg_vals == 0).sum()
-    best_idx = chg_vals.idxmax() if not chg_vals.empty else None
-    worst_idx = chg_vals.idxmin() if not chg_vals.empty else None
-    best_name = active.at[best_idx, "Name"] if best_idx is not None else ""
-    worst_name = active.at[worst_idx, "Name"] if worst_idx is not None else ""
-    best_chg = chg_vals.max() if not chg_vals.empty else 0
-    worst_chg = chg_vals.min() if not chg_vals.empty else 0
+    top3 = chg_vals.nlargest(3)
+    bot3 = chg_vals.nsmallest(3)
+    def fmt_list(s):
+        return "  ".join(f"{active.at[i,'Name']} {v:+.1f}%" for i, v in s.items())
     st.markdown(
         f"🟢 {green}  🔴 {red}  ⚪ {flat}  &nbsp;|&nbsp; "
-        f"▲ {best_name} {best_chg:+.1f}%  &nbsp;|&nbsp; "
-        f"▼ {worst_name} {worst_chg:+.1f}%",
+        f"▲ {fmt_list(top3)}  &nbsp;|&nbsp; "
+        f"▼ {fmt_list(bot3)}",
         unsafe_allow_html=True
     )
     
