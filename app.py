@@ -459,6 +459,22 @@ if not st.session_state.market_df.empty:
         unsafe_allow_html=True
     )
     
+    # Sector summary expander
+    with st.expander("Sector-wise Summary", expanded=False):
+        sector_stats = active.groupby("Sector")["Change%"].agg(
+            green=lambda x: (x > 0).sum(),
+            red=lambda x: (x < 0).sum(),
+            flat=lambda x: (x == 0).sum()
+        ).reset_index()
+        sector_stats["Total"] = sector_stats["green"] + sector_stats["red"] + sector_stats["flat"]
+        sector_stats = sector_stats.sort_values("Total", ascending=False)
+        html = "<table style='width:100%; font-size:0.75rem;'>"
+        html += "<tr><th>Sector</th><th>🟢</th><th>🔴</th><th>⚪</th><th>Total</th></tr>"
+        for _, r in sector_stats.iterrows():
+            html += f"<tr><td>{r['Sector']}</td><td>{r['green']}</td><td>{r['red']}</td><td>{r['flat']}</td><td>{r['Total']}</td></tr>"
+        html += "</table>"
+        st.markdown(html, unsafe_allow_html=True)
+    
     st.dataframe(styled_df, width='stretch', hide_index=True, height=2000,
         column_config={
             "Star": st.column_config.TextColumn("⭐", width=30),
