@@ -379,6 +379,7 @@ if not st.session_state.market_df.empty:
             "Star", "#", "1Y", "Link", "Name", "Sector", "LTP", "Change%",
             "2D Chg", "3D Chg", "4D Chg", "5D Chg", "6D Chg",
             "7D Chg", "8D Chg", "9D Chg", "10D Chg", "11D Chg", "12D Chg", "13D Chg", "14D Chg", "15D Chg",
+            "Vol Breakout", "RSI(14)",
             "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 6M H %", "vs 1Y H %"
         ]
     else:
@@ -472,7 +473,7 @@ if not st.session_state.market_df.empty:
             "Port Count": st.column_config.NumberColumn("Count", format="%d", width=50),
             "Port Total": st.column_config.NumberColumn("Total", format="₹%.0f", width=70),
             "RSI(14)": st.column_config.NumberColumn("RSI", format="%.0f", width=45),
-            "Vol Breakout": st.column_config.NumberColumn("Vol", format="%.1f", width=45),
+            "Vol Breakout": st.column_config.NumberColumn("Vol Brk", format="%.1f", width=55),
             "MCap ($)": st.column_config.NumberColumn("MCap", format="%.0f", width=70),
             "PE": st.column_config.NumberColumn("PE", format="%.1f", width=50),
             "EPS": st.column_config.NumberColumn("EPS", format="%.1f", width=50),
