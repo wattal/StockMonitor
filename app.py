@@ -224,6 +224,16 @@ with st.sidebar:
     if sector_sel != st.session_state.persist_sector:
         st.session_state.persist_sector = sector_sel
         st.rerun()
+    
+    # Sort order
+    st.write("**Sort By:**")
+    if "persist_sort" not in st.session_state: st.session_state.persist_sort = "Change% ↓"
+    sort_opts = ["Change% ↓", "Change% ↑", "Name A→Z", "Name Z→A", "LTP ₹↓", "LTP ₹↑"]
+    sort_idx = sort_opts.index(st.session_state.persist_sort) if st.session_state.persist_sort in sort_opts else 0
+    sort_sel = st.selectbox("Sort", options=sort_opts, index=sort_idx, key="persist_sort_select", label_visibility="collapsed")
+    if sort_sel != st.session_state.persist_sort:
+        st.session_state.persist_sort = sort_sel
+        st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
 
     # --- WATCHLIST ---
@@ -377,7 +387,17 @@ if not st.session_state.market_df.empty:
         return "🔴"                      # Near Low - Red
     active["1Y"] = active.apply(get_1y_color, axis=1)
 
-    active = active.sort_values(by="Change%", ascending=False, ignore_index=True, na_position="last")
+    # Apply user-selected sort order
+    sort_map = {
+        "Change% ↓": ("Change%", False),
+        "Change% ↑": ("Change%", True),
+        "Name A→Z": ("Name", True),
+        "Name Z→A": ("Name", False),
+        "LTP ₹↓": ("LTP", False),
+        "LTP ₹↑": ("LTP", True),
+    }
+    sort_col, sort_asc = sort_map.get(st.session_state.get("persist_sort", "Change% ↓"), ("Change%", False))
+    active = active.sort_values(by=sort_col, ascending=sort_asc, ignore_index=True, na_position="last")
     active.insert(1, "#", range(1, len(active) + 1))
 
     # Collapse Sector to parent category for display
