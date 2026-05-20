@@ -350,20 +350,7 @@ if not st.session_state.market_df.empty:
                     if prev_c > 0:
                         active.at[i, f"{days_ago}D Chg"] = ((curr_c - prev_c) / prev_c) * 100
 
-    # Portfolio columns
-    def get_port_count(ticker):
-        if ticker in st.session_state.portfolio:
-            return st.session_state.portfolio[ticker]["count"]
-        return 0
-    
-    def get_port_total(ticker):
-        if ticker in st.session_state.portfolio:
-            return st.session_state.portfolio[ticker]["count"] * st.session_state.portfolio[ticker]["avg_cost"]
-        return 0
-    
-    active["Port Count"] = active["TickerID"].apply(get_port_count)
-    active["Port Total"] = active["TickerID"].apply(get_port_total)
-    
+
     # Link column - Yahoo Finance links
     def get_link(ticker):
         suffix = ".NS" if ".NS" in ticker else ".BO"
@@ -414,7 +401,7 @@ if not st.session_state.market_df.empty:
         ]
     else:
         order = [
-            "Star", "#", "1Y", "Link", "Name", "Sector", "AddedDate", "LTP", "Change%", "Port Count", "Port Total",
+            "Star", "#", "1Y", "Link", "Name", "Sector", "AddedDate", "LTP", "Change%",
             "vs 7D H %", "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 1Y H %", "vs 1Y L %",
             "vs 100DMA %", "RSI(14)", "Vol Breakout", "MCap ($)", "PE", "EPS",
             "Promoter Holding %", "Promoter Activity"
@@ -422,7 +409,7 @@ if not st.session_state.market_df.empty:
     
     final_cols = [c for c in order if c in active.columns]
     pct_cols = [c for c in final_cols if "%" in c or "Chg" in c]
-    tech_fmt_active = [c for c in final_cols if c in ["Vol Breakout", "RSI(14)", "PE", "EPS", "MCap ($)", "Port Count", "Port Total"]]
+    tech_fmt_active = [c for c in final_cols if c in ["Vol Breakout", "RSI(14)", "PE", "EPS", "MCap ($)"]]
 
     def color_pct(val):
         if not isinstance(val, (int, float)) or pd.isna(val): return ""
@@ -457,7 +444,6 @@ if not st.session_state.market_df.empty:
         .map(color_rsi, subset=["RSI(14)"] if "RSI(14)" in final_cols else [])
         .map(color_vol, subset=["Vol Breakout"] if "Vol Breakout" in final_cols else [])
         .map(color_1y, subset=["1Y"])
-        .map(color_port, subset=["Port Count", "Port Total"] if "Port Count" in final_cols else [])
         .format(precision=1, subset=pct_cols + tech_fmt_active))
 
     # Stock count and export in one row
@@ -516,8 +502,6 @@ if not st.session_state.market_df.empty:
             "AddedDate": st.column_config.TextColumn("Added", width=70),
             "LTP": st.column_config.NumberColumn("LTP", format="₹%.0f", width=65),
             "Change%": st.column_config.NumberColumn("Chg%", format="%.1f%%", width=55),
-            "Port Count": st.column_config.NumberColumn("Count", format="%d", width=50),
-            "Port Total": st.column_config.NumberColumn("Total", format="₹%.0f", width=70),
             "RSI(14)": st.column_config.NumberColumn("RSI", format="%.0f", width=45),
             "Vol Breakout": st.column_config.NumberColumn("Vol Brk", format="%.1f", width=55),
             "MCap ($)": st.column_config.NumberColumn("MCap", format="%.0f", width=70),
