@@ -376,10 +376,9 @@ if not st.session_state.market_df.empty:
         if score >= 60: return "🟠"      # Below Mid - Orange
         return "🔴"                      # Near Low - Red
     active["1Y"] = active.apply(get_1y_color, axis=1)
-    
-    active.insert(1, "#", range(1, len(active) + 1))
 
     active = active.sort_values(by="Change%", ascending=False, ignore_index=True, na_position="last")
+    active.insert(1, "#", range(1, len(active) + 1))
 
     # Collapse Sector to parent category for display
     active["Sector"] = active["Sector"].apply(lambda x: x.split(" - ")[0] if " - " in str(x) else x)
