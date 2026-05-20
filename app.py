@@ -35,6 +35,22 @@ st.markdown("""
         section[data-testid="stSidebar"] button { min-height: 2.5rem !important; font-size: 0.85rem !important; }
         .st-emotion-cache-1v0mbdj { margin: 0 !important; padding: 0.2rem !important; }
         button[kind="primary"], button[kind="secondary"] { min-height: 2.5rem !important; }
+        .st-emotion-cache-1mi2ry5, .st-emotion-cache-1f3w014 { display: none !important; }
+        button[kind="header"] { display: none !important; }
+        section[data-testid="stSidebar"] .st-emotion-cache-1wrcr25 { display: none !important; }
+        section[data-testid="stSidebar"] { z-index: 9999 !important; }
+        .st-emotion-cache-1dp5vir { display: none !important; }
+        .st-emotion-cache-1g63q8p { padding: 0.5rem 0.5rem !important; }
+        .main .block-container { padding-top: 0.5rem !important; }
+        .st-emotion-cache-183lzky { font-size: 0.7rem !important; }
+        .st-emotion-cache-1r4qj8v { gap: 0.2rem !important; }
+        .stTabs { overflow-x: auto !important; }
+        .row-widget.stColumns { gap: 0.2rem !important; }
+        .st-emotion-cache-1r6slb0 { font-size: 0.5rem !important; }
+        .st-emotion-cache-1aej3w7 { min-width: auto !important; }
+        [data-testid="stHeader"] { display: none !important; }
+        .st-emotion-cache-1cw0yex { min-height: 0 !important; }
+        .st-emotion-cache-1in3zxl { display: none !important; }
     }
 </style>
 """, unsafe_allow_html=True)
