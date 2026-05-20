@@ -402,8 +402,6 @@ MASTER_MAP = {
     "SARVESHWAR.BO": {"Name": "Sarveshwar Foods", "Sector": "Consumer - Food Processing"},
     "ZODIAC.NS": {"Name": "Zodiac Energy", "Sector": "Energy - Renewable"},
     "SBC.NS": {"Name": "SBC Exports", "Sector": "Textiles"},
-    "STANCAP.BO": {"Name": "Standard Capital", "Sector": "Financials - Diversified"},
-    "VIKASLIFE.BO": {"Name": "Vikas Lifecare", "Sector": "Chemicals"},
     "SCANPGEOM.BO": {"Name": "Scanpoint Geomatics", "Sector": "Technology - Services"},
     "RTNPOWER.NS": {"Name": "RattanIndia Power", "Sector": "Energy - Power"},
     "INA.BO": {"Name": "Insolation Energy", "Sector": "Energy - Solar", "AddedDate": "2025-04-27"},
