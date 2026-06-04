@@ -19,6 +19,14 @@ st.markdown("""
     .block-container { max-width: 100% !important; padding: 0.3rem 0.5rem !important; }
     .stDataFrame thead th { padding: 4px 6px !important; font-size: 0.7rem !important; }
     .stDataFrame tbody td { padding: 2px 6px !important; }
+    .stDataFrame { scrollbar-width: auto !important; }
+    .stDataFrame ::-webkit-scrollbar { height: 12px !important; width: 10px !important; }
+    .stDataFrame ::-webkit-scrollbar-track { background: #e5e7eb !important; border-radius: 4px !important; }
+    .stDataFrame ::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 4px !important; min-height: 40px !important; }
+    .stDataFrame ::-webkit-scrollbar-thumb:hover { background: #6b7280 !important; }
+    .stDataFrame div::-webkit-scrollbar { height: 12px !important; width: 10px !important; }
+    .stDataFrame div::-webkit-scrollbar-track { background: #e5e7eb !important; border-radius: 4px !important; }
+    .stDataFrame div::-webkit-scrollbar-thumb { background: #9ca3af !important; border-radius: 4px !important; }
     section[data-testid="stSidebar"] button { 
         background-color: #ffffff !important; 
         color: #1e40af !important;
@@ -158,6 +166,7 @@ def clear_all_caches():
     for f in glob.glob("daily_prices_*.json") + ["history_cache.pkl"]:
         try: os.remove(f)
         except: pass
+    st.cache_data.clear()
     st.session_state.market_df = pd.DataFrame()
     st.session_state.baselines_cache = {}
     st.session_state.raw_history_cache = None
@@ -234,7 +243,7 @@ with st.sidebar:
     # Sort order
     st.write("**Sort By:**")
     if "persist_sort" not in st.session_state: st.session_state.persist_sort = "Change% ↓"
-    sort_opts = ["Change% ↓", "Change% ↑", "Name A→Z", "Name Z→A", "LTP ₹↓", "LTP ₹↑"]
+    sort_opts = ["Change% ↓", "Change% ↑", "Name A→Z", "Name Z→A", "LTP ₹↓", "LTP ₹↑", "# →", "# ←"]
     sort_idx = sort_opts.index(st.session_state.persist_sort) if st.session_state.persist_sort in sort_opts else 0
     sort_sel = st.selectbox("Sort", options=sort_opts, index=sort_idx, key="persist_sort_select", label_visibility="collapsed")
     if sort_sel != st.session_state.persist_sort:
@@ -262,6 +271,16 @@ with st.sidebar:
         handle_portfolio_add()
         st.rerun()
     st.markdown("<div style='margin-top: 1.5rem;'></div><hr style='margin: 0;'>", unsafe_allow_html=True)
+
+    # --- REMOVED STOCKS ---
+    removed = eng.load_removed_stocks()
+    if removed:
+        with st.expander(f"Removed Stocks ({len(removed)})", expanded=False):
+            for t, info in sorted(removed.items()):
+                name = info.get("Name", t)
+                sector = info.get("Sector", "")
+                rd = info.get("RemovedDate", "")
+                st.caption(f"{name} ({sector}) — removed {rd}")
 
     # --- CONTROLS ---
     section_header("Refresh")
@@ -340,14 +359,18 @@ if not st.session_state.market_df.empty:
     if st.session_state.get("persist_sector") and st.session_state.persist_sector != "All":
         active = active[active["Sector"].str.split(" - ").str[0] == st.session_state.persist_sector]
 
+    # Hide stocks with no historical data (thinly traded SME stocks etc.)
+    if st.session_state.baselines_cache:
+        active = active[active["TickerID"].isin(st.session_state.baselines_cache.keys())]
+
     # Lazy load daily changes only when Trend View is enabled
     if st.session_state.get("trend_view", False):
-        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=25)
+        daily_prices = eng.get_daily_prices(list(active["TickerID"]), days=50)
         for i, row in active.iterrows():
             ticker = row["TickerID"]
             closes = daily_prices.get(ticker, [])
             if len(closes) >= 3:
-                max_days = min(15, len(closes) - 1)
+                max_days = min(30, len(closes) - 1)
                 for days_ago in range(2, max_days + 1):
                     curr_idx = -days_ago
                     prev_idx = -(days_ago + 1)
@@ -355,6 +378,10 @@ if not st.session_state.market_df.empty:
                     prev_c = closes[prev_idx]
                     if prev_c > 0:
                         active.at[i, f"{days_ago}D Chg"] = ((curr_c - prev_c) / prev_c) * 100
+                window = closes[-(max_days + 1):]
+                ups = sum(1 for i in range(1, len(window)) if window[i] > window[i-1])
+                downs = sum(1 for i in range(1, len(window)) if window[i] < window[i-1])
+                active.at[i, "Up/Dn 30D"] = f"{ups} | {downs}"
 
 
     # Link column - Yahoo Finance links
@@ -388,6 +415,8 @@ if not st.session_state.market_df.empty:
         "Name Z→A": ("Name", False),
         "LTP ₹↓": ("LTP", False),
         "LTP ₹↑": ("LTP", True),
+        "# →": ("TickerID", True),
+        "# ←": ("TickerID", False),
     }
     sort_col, sort_asc = sort_map.get(st.session_state.get("persist_sort", "Change% ↓"), ("Change%", False))
     active = active.sort_values(by=sort_col, ascending=sort_asc, ignore_index=True, na_position="last")
@@ -400,10 +429,10 @@ if not st.session_state.market_df.empty:
     if st.session_state.get("trend_view", False):
         order = [
             "Star", "#", "1Y", "Link", "Name", "Sector", "LTP", "Change%",
-            "2D Chg", "3D Chg", "4D Chg", "5D Chg", "6D Chg",
-            "7D Chg", "8D Chg", "9D Chg", "10D Chg", "11D Chg", "12D Chg", "13D Chg", "14D Chg", "15D Chg",
-            "Vol Breakout", "RSI(14)",
-            "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 6M H %", "vs 1Y H %"
+            "Up/Dn 30D",
+            "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 6M H %", "vs 1Y H %",
+            *[f"{d}D Chg" for d in range(2, 31)],
+            "Vol Breakout", "RSI(14)"
         ]
     else:
         order = [
@@ -445,7 +474,12 @@ if not st.session_state.market_df.empty:
         if not isinstance(val, (int, float)) or pd.isna(val) or val == 0: return ""
         return "background: #dcfce7; color: #15803d;"
     
+    # Zebra stripe: only style the Name column to avoid inline style bloat
+    def stripe_row(row):
+        return ["background-color: #f0f8ff" if row.name % 2 == 0 else ""] * len(row)
+
     styled_df = (active[final_cols].style
+        .apply(stripe_row, axis=1, subset=[c for c in ["Name"] if c in final_cols])
         .map(color_pct, subset=pct_cols)
         .map(color_rsi, subset=["RSI(14)"] if "RSI(14)" in final_cols else [])
         .map(color_vol, subset=["Vol Breakout"] if "Vol Breakout" in final_cols else [])
@@ -509,6 +543,7 @@ if not st.session_state.market_df.empty:
             "LTP": st.column_config.NumberColumn("LTP", format="₹%.0f", width=65),
             "Change%": st.column_config.NumberColumn("Chg%", format="%.1f%%", width=55),
             "RSI(14)": st.column_config.NumberColumn("RSI", format="%.0f", width=45),
+            "Up/Dn 30D": st.column_config.TextColumn("Up/Dn", width=65),
             "Vol Breakout": st.column_config.NumberColumn("Vol Brk", format="%.1f", width=55),
             "MCap ($)": st.column_config.NumberColumn("MCap", format="%.0f", width=70),
             "PE": st.column_config.NumberColumn("PE", format="%.1f", width=50),

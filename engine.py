@@ -5,7 +5,7 @@ import time
 import datetime
 import streamlit as st
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
 
 HISTORY_CACHE_FILE = "history_cache.pkl"
 CACHE_HOURS = 24  # Refresh history once per day
@@ -171,9 +171,9 @@ def get_live_data(tickers, baselines, dormant_set, mode="desktop"):
 
 @st.cache_data(ttl=86400)
 def fetch_fundamentals_map(tickers, usd_rate):
-    """Fetches MCAP, PE, PB, EPS, and Promoter Holding %."""
+    """Fetches MCAP, PE, PB, EPS, and Promoter Holding % (parallel)."""
     results = {}
-    for t in tickers:
+    def fetch_one(t):
         try:
             info = yf.Ticker(t).info
             mcap = info.get("marketCap", np.nan)
@@ -181,22 +181,29 @@ def fetch_fundamentals_map(tickers, usd_rate):
             if not pd.isna(mcap):
                 mcap = (mcap / usd_rate / 1_000_000) if curr == "INR" else (mcap / 1_000_000)
             hpi = info.get("heldPercentInsiders", np.nan)
-            results[t] = {
+            return (t, {
                 "MCap ($)": round(mcap, 2),
                 "PE": info.get("trailingPE", np.nan),
                 "PB": info.get("priceToBook", np.nan),
                 "EPS": info.get("trailingEps", np.nan),
                 "Promoter Holding %": round(hpi * 100, 2) if not pd.isna(hpi) else np.nan
-            }
-        except: continue
+            })
+        except:
+            return (t, None)
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        fut = {ex.submit(fetch_one, t): t for t in tickers}
+        for f in as_completed(fut, timeout=120):
+            t, r = f.result()
+            if r is not None:
+                results[t] = r
     return results
 
 @st.cache_data(ttl=86400)
 def fetch_promoter_activity_map(tickers):
-    """Fetches promoter transactions within last 30 days for all tickers (cached 24h)."""
+    """Fetches promoter transactions within last 30 days for all tickers (cached 24h, parallel)."""
     cutoff = datetime.datetime.now() - datetime.timedelta(days=30)
     results = {}
-    for t in tickers:
+    def fetch_one(t):
         try:
             tkr = yf.Ticker(t)
             trans = tkr.insider_transactions
@@ -216,15 +223,15 @@ def fetch_promoter_activity_map(tickers):
                                 summary_parts.append(f"{action} {shares//1000}K ({dt[-5:]})")
                             else:
                                 summary_parts.append(f"{action} {shares} ({dt[-5:]})")
-                        results[t] = ", ".join(summary_parts) if summary_parts else ""
-                    else:
-                        results[t] = ""
-                else:
-                    results[t] = ""
-            else:
-                results[t] = ""
+                        return (t, ", ".join(summary_parts) if summary_parts else "")
+            return (t, "")
         except Exception:
-            results[t] = ""
+            return (t, "")
+    with ThreadPoolExecutor(max_workers=10) as ex:
+        fut = {ex.submit(fetch_one, t): t for t in tickers}
+        for f in as_completed(fut, timeout=120):
+            t, val = f.result()
+            results[t] = val
     return results
 
 def quick_refresh_prices(tickers, baselines):
@@ -275,3 +282,19 @@ def save_to_watchlist(ticker, add=True):
     with open("watchlist.txt", "w") as f:
         for t in sorted(current):
             f.write(f"{t}\n")
+
+# --- BLOCK E4: REMOVED STOCKS ---
+def load_removed_stocks():
+    import json
+    if not os.path.exists("removed_stocks.json"):
+        return {}
+    try:
+        with open("removed_stocks.json", "r") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_removed_stocks(data):
+    import json
+    with open("removed_stocks.json", "w") as f:
+        json.dump(data, f, indent=2)
