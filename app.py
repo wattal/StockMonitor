@@ -243,7 +243,16 @@ with st.sidebar:
     # Sort order
     st.write("**Sort By:**")
     if "persist_sort" not in st.session_state: st.session_state.persist_sort = "Change% ↓"
-    sort_opts = ["Change% ↓", "Change% ↑", "Name A→Z", "Name Z→A", "LTP ₹↓", "LTP ₹↑", "# →", "# ←"]
+    template_cols = ["Change%", "Name", "LTP", "TickerID", "vs 1Y H %", "vs 15D H %", "vs 30D H %", "vs 3M H %", "vs 1Y L %", "H/L since %", "RSI(14)", "Vol Breakout", "MCap ($)", "PE", "EPS", "Up/Dn 30D"]
+    sort_opts = []
+    for col in template_cols:
+        sort_opts.append(f"{col} ↓")
+        if col not in ("Name", "TickerID", "Up/Dn 30D"):
+            sort_opts.append(f"{col} ↑")
+        if col == "Name":
+            sort_opts += ["Name A→Z", "Name Z→A"]
+        if col == "TickerID":
+            sort_opts += ["# →", "# ←"]
     sort_idx = sort_opts.index(st.session_state.persist_sort) if st.session_state.persist_sort in sort_opts else 0
     sort_sel = st.selectbox("Sort", options=sort_opts, index=sort_idx, key="persist_sort_select", label_visibility="collapsed")
     if sort_sel != st.session_state.persist_sort:
@@ -407,19 +416,26 @@ if not st.session_state.market_df.empty:
         return "🔴"                      # Near Low - Red
     active["1Y"] = active.apply(get_1y_color, axis=1)
 
-    # Apply user-selected sort order
-    sort_map = {
-        "Change% ↓": ("Change%", False),
-        "Change% ↑": ("Change%", True),
-        "Name A→Z": ("Name", True),
-        "Name Z→A": ("Name", False),
-        "LTP ₹↓": ("LTP", False),
-        "LTP ₹↑": ("LTP", True),
-        "# →": ("TickerID", True),
-        "# ←": ("TickerID", False),
-    }
-    sort_col, sort_asc = sort_map.get(st.session_state.get("persist_sort", "Change% ↓"), ("Change%", False))
-    active = active.sort_values(by=sort_col, ascending=sort_asc, ignore_index=True, na_position="last")
+    # Apply user-selected sort order (dynamic parsing)
+    sort_raw = st.session_state.get("persist_sort", "Change% ↓")
+    if sort_raw.endswith(" ↓"):
+        sort_col = sort_raw[:-2].strip()
+        sort_asc = False
+    elif sort_raw.endswith(" ↑"):
+        sort_col = sort_raw[:-2].strip()
+        sort_asc = True
+    elif sort_raw == "Name A→Z":
+        sort_col, sort_asc = "Name", True
+    elif sort_raw == "Name Z→A":
+        sort_col, sort_asc = "Name", False
+    elif sort_raw == "# →":
+        sort_col, sort_asc = "TickerID", True
+    elif sort_raw == "# ←":
+        sort_col, sort_asc = "TickerID", False
+    else:
+        sort_col, sort_asc = "Change%", False
+    if sort_col in active.columns:
+        active = active.sort_values(by=sort_col, ascending=sort_asc, ignore_index=True, na_position="last")
     active.insert(1, "#", range(1, len(active) + 1))
 
     # Collapse Sector to parent category for display
@@ -474,12 +490,14 @@ if not st.session_state.market_df.empty:
         if not isinstance(val, (int, float)) or pd.isna(val) or val == 0: return ""
         return "background: #dcfce7; color: #15803d;"
     
-    # Zebra stripe: only style the Name column to avoid inline style bloat
+    # Force clean index so zebra striping follows sort/filter order
+    active = active.reset_index(drop=True)
+    # Zebra stripe across full row
     def stripe_row(row):
         return ["background-color: #f0f8ff" if row.name % 2 == 0 else ""] * len(row)
 
     styled_df = (active[final_cols].style
-        .apply(stripe_row, axis=1, subset=[c for c in ["Name"] if c in final_cols])
+        .apply(stripe_row, axis=1, subset=final_cols)
         .map(color_pct, subset=pct_cols)
         .map(color_rsi, subset=["RSI(14)"] if "RSI(14)" in final_cols else [])
         .map(color_vol, subset=["Vol Breakout"] if "Vol Breakout" in final_cols else [])

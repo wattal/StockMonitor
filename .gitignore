@@ -3,6 +3,7 @@ __pycache__/
 *.pyo
 *.pkl
 *.json
+!removed_stocks.json
 backups/
 .streamlit/
 *.log

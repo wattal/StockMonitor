@@ -1,0 +1,80 @@
+{
+  "MANGALAM.NS": {
+    "Name": "Mangalam Cement Ltd.",
+    "Sector": "Construction - Cement",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "RELINFRA.NS": {
+    "Name": "Reliance Infra.",
+    "Sector": "Infrastructure - Power",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "RPOWER.NS": {
+    "Name": "Reliance Power",
+    "Sector": "Energy - Power",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "RPPINFRA.NS": {
+    "Name": "RPP Infra Projects Ltd.",
+    "Sector": "Construction - Infrastructure",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "NEWGEN.NS": {
+    "Name": "Newgen Software",
+    "Sector": "Technology - Products",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "SARVESHWAR.BO": {
+    "Name": "Sarveshwar Foods",
+    "Sector": "Consumer - Food Processing",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "RUSHIL.NS": {
+    "Name": "Rushil Decor",
+    "Sector": "Industrial - Wood Products",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "RRP.BO": {
+    "Name": "RRP Semiconductor Ltd",
+    "Sector": "Technology - Semiconductor",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "DAVANGERE.NS": {
+    "Name": "Davangere Sugar Company Ltd.",
+    "Sector": "Consumer - Sugar",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-04"
+  },
+  "ZODIAC.NS": {
+    "Name": "Zodiac Energy",
+    "Sector": "Energy - Renewable",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-11"
+  },
+  "PRAKASHSTL.NS": {
+    "Name": "Prakash Steelage",
+    "Sector": "Metals - Steel Pipes",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-11"
+  },
+  "RAJSREESUG.NS": {
+    "Name": "Rajshree Sugars & Chemicals Ltd.",
+    "Sector": "Consumer - Sugar",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-11"
+  },
+  "ALMONDZ.BO": {
+    "Name": "Almondz Global",
+    "Sector": "Financials - Capital Markets",
+    "AddedDate": "",
+    "RemovedDate": "2026-06-11"
+  }
+}
